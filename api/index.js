@@ -29,7 +29,7 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
       },
       {
         headers: {
-          Authorization: "Bearer YOUR_CLICKUP_API_TOKEN", // Replace with your actual ClickUp API token
+          Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
           "Content-Type": "application/json",
         },
       },
@@ -66,15 +66,22 @@ app.post(
   async (req, res) => {
     const { task_id, status_name, plan_progress, actual_progress } = req.params;
 
-    // Decode URL-encoded parameters
-    const decodedPlanProgress = decodeURIComponent(plan_progress).replace(
-      "%",
-      "",
-    );
-    const decodedActualProgress = decodeURIComponent(actual_progress).replace(
-      "%",
-      "",
-    );
+    let decodedPlanProgress, decodedActualProgress;
+
+    try {
+      decodedPlanProgress = decodeURIComponent(plan_progress).replace(
+        "%25",
+        "",
+      );
+      decodedActualProgress = decodeURIComponent(actual_progress).replace(
+        "%25",
+        "",
+      );
+    } catch (error) {
+      return res
+        .status(400)
+        .send("Invalid URL encoding in plan_progress or actual_progress");
+    }
 
     if (isNaN(decodedPlanProgress) || isNaN(decodedActualProgress)) {
       return res
