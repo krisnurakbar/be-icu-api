@@ -60,36 +60,23 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
   }
 });
 
-// Helper function to sanitize and decode URL parameters
-function sanitizeAndDecode(value) {
-  // Replace encoded '%' with empty string, then decode the value
-  return decodeURIComponent(value.replace(/%25/g, ""));
-}
-
 // New SPI endpoint with URL parameters
 app.post(
   "/api/spi/:task_id/:status_name/:plan_progress/:actual_progress",
   async (req, res) => {
     const { task_id, status_name, plan_progress, actual_progress } = req.params;
 
-    let decodedPlanProgress, decodedActualProgress;
+    // Replace %25 with an empty string
+    const cleanedPlanProgress = plan_progress.replace(/%25/g, "");
+    const cleanedActualProgress = actual_progress.replace(/%25/g, "");
 
-    try {
-      decodedPlanProgress = sanitizeAndDecode(plan_progress);
-      decodedActualProgress = sanitizeAndDecode(actual_progress);
-    } catch (error) {
-      return res
-        .status(400)
-        .send("Invalid URL encoding in plan_progress or actual_progress");
-    }
-
-    if (isNaN(decodedPlanProgress) || isNaN(decodedActualProgress)) {
+    if (isNaN(cleanedPlanProgress) || isNaN(cleanedActualProgress)) {
       return res
         .status(400)
         .send("plan_progress and actual_progress must be numbers");
     }
 
-    const spi = Number(decodedActualProgress) / Number(decodedPlanProgress);
+    const spi = Number(cleanedActualProgress) / Number(cleanedPlanProgress);
 
     // Make an HTTP request to the ClickUp API
     try {
@@ -115,8 +102,8 @@ app.post(
       res.status(200).json({
         task_id,
         status_name,
-        plan_progress: Number(decodedPlanProgress),
-        actual_progress: Number(decodedActualProgress),
+        plan_progress: Number(cleanedPlanProgress),
+        actual_progress: Number(cleanedActualProgress),
         spi: spi,
         clickUpResponse: clickUpResponse.data,
       });
