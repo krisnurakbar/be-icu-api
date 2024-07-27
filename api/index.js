@@ -29,7 +29,9 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
   try {
     const response = await axios.post(
       `https://api.clickup.com/api/v2/task/${task_id}/field/3fae2d90-850b-4ad8-b7d7-5846a5ee65a0`,
-      {},
+      {
+        value: 1, // Replace 123 with the actual number you want to send
+      },
       {
         headers: {
           Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
