@@ -11,16 +11,18 @@ app.use(cors());
 // In-memory storage for tasks
 const tasks = [];
 
-// Webhook endpoint
-app.post("/api/webhook", (req, res) => {
-  const { task_id, status_name } = req.body;
+// Webhook endpoint with URL parameters
+app.post("/api/webhook/:task_id/:status_name", (req, res) => {
+  const { task_id, status_name } = req.params;
 
   if (!task_id || !status_name) {
     return res.status(400).send("task_id and status_name are required");
   }
 
   tasks.push({ task_id, status_name });
-  res.status(200).send("Task received");
+
+  // Respond with task_id and status_name
+  res.status(200).json({ task_id, status_name });
 });
 
 // Endpoint to get tasks
