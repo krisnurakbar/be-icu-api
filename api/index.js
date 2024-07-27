@@ -60,6 +60,12 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
   }
 });
 
+// Helper function to sanitize and decode URL parameters
+function sanitizeAndDecode(value) {
+  // Replace encoded '%' with empty string, then decode the value
+  return decodeURIComponent(value.replace(/%25/g, ""));
+}
+
 // New SPI endpoint with URL parameters
 app.post(
   "/api/spi/:task_id/:status_name/:plan_progress/:actual_progress",
@@ -69,14 +75,8 @@ app.post(
     let decodedPlanProgress, decodedActualProgress;
 
     try {
-      decodedPlanProgress = decodeURIComponent(plan_progress).replace(
-        "%25",
-        "",
-      );
-      decodedActualProgress = decodeURIComponent(actual_progress).replace(
-        "%25",
-        "",
-      );
+      decodedPlanProgress = sanitizeAndDecode(plan_progress);
+      decodedActualProgress = sanitizeAndDecode(actual_progress);
     } catch (error) {
       return res
         .status(400)
