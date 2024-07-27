@@ -105,6 +105,16 @@ app.post(
         );
     }
 
+    // If plan_progress is not 0 and actual_progress is 0, set actual_progress to 1
+    if (cleanedPlanProgress !== 0 && cleanedActualProgress === 0) {
+      cleanedActualProgress = 1;
+    }
+
+    // If actual_progress is not 0 and plan_progress is 0, set plan_progress to 1
+    if (cleanedActualProgress !== 0 && cleanedPlanProgress === 0) {
+      cleanedPlanProgress = 1;
+    }
+
     const spi = cleanedActualProgress / cleanedPlanProgress;
 
     // Make an HTTP request to the ClickUp API
