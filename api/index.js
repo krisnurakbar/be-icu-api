@@ -29,7 +29,7 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
       },
       {
         headers: {
-          Authorization: "Bearer YOUR_CLICKUP_API_TOKEN", // Replace with your actual ClickUp API token
+          Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
           "Content-Type": "application/json",
         },
       },
