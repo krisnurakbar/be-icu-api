@@ -66,13 +66,23 @@ app.post(
   async (req, res) => {
     const { task_id, status_name, plan_progress, actual_progress } = req.params;
 
-    if (isNaN(plan_progress) || isNaN(actual_progress)) {
+    // Decode URL-encoded parameters
+    const decodedPlanProgress = decodeURIComponent(plan_progress).replace(
+      "%",
+      "",
+    );
+    const decodedActualProgress = decodeURIComponent(actual_progress).replace(
+      "%",
+      "",
+    );
+
+    if (isNaN(decodedPlanProgress) || isNaN(decodedActualProgress)) {
       return res
         .status(400)
         .send("plan_progress and actual_progress must be numbers");
     }
 
-    const spi = Number(actual_progress) / Number(plan_progress);
+    const spi = Number(decodedActualProgress) / Number(decodedPlanProgress);
 
     // Make an HTTP request to the ClickUp API
     try {
@@ -98,8 +108,8 @@ app.post(
       res.status(200).json({
         task_id,
         status_name,
-        plan_progress: Number(plan_progress),
-        actual_progress: Number(actual_progress),
+        plan_progress: Number(decodedPlanProgress),
+        actual_progress: Number(decodedActualProgress),
         spi: spi,
         clickUpResponse: clickUpResponse.data,
       });
