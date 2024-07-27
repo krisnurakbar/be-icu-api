@@ -67,8 +67,8 @@ app.post(
     const { task_id, status_name, plan_progress, actual_progress } = req.params;
 
     // Replace %25 with an empty string
-    const cleanedPlanProgress = plan_progress.replace(/%25/g, "");
-    const cleanedActualProgress = actual_progress.replace(/%25/g, "");
+    const cleanedPlanProgress = plan_progress.replaceAll("%25", "");
+    const cleanedActualProgress = actual_progress.replaceAll("%25", "");
 
     console.log(
       `Cleaned plan_progress: ${cleanedPlanProgress}, Cleaned actual_progress: ${cleanedActualProgress}`,
