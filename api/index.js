@@ -115,7 +115,8 @@ app.post(
       cleanedPlanProgress = 1;
     }
 
-    const spi = cleanedActualProgress / cleanedPlanProgress;
+    // Calculate SPI and round to 2 decimal places
+    const spi = (cleanedActualProgress / cleanedPlanProgress).toFixed(2);
 
     // Make an HTTP request to the ClickUp API
     try {
