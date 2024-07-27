@@ -105,18 +105,24 @@ app.post(
         );
     }
 
-    // If plan_progress is not 0 and actual_progress is 0, set actual_progress to 1
-    if (cleanedPlanProgress !== 0 && cleanedActualProgress === 0) {
-      cleanedActualProgress = 1;
+    // Calculate SPI based on conditions
+    if (cleanedPlanProgress === 0 && cleanedActualProgress === 0) {
+      spi = 1;
+    } else {
+      // If plan_progress is not 0 and actual_progress is 0, set actual_progress to 1
+      if (cleanedPlanProgress !== 0 && cleanedActualProgress === 0) {
+        cleanedActualProgress = 1;
+      }
+
+      // If actual_progress is not 0 and plan_progress is 0, set plan_progress to 1
+      if (cleanedActualProgress !== 0 && cleanedPlanProgress === 0) {
+        cleanedPlanProgress = 1;
+      }
+
+      // Calculate SPI and round to 2 decimal places
+      spi = (cleanedActualProgress / cleanedPlanProgress).toFixed(2);
     }
 
-    // If actual_progress is not 0 and plan_progress is 0, set plan_progress to 1
-    if (cleanedActualProgress !== 0 && cleanedPlanProgress === 0) {
-      cleanedPlanProgress = 1;
-    }
-
-    // Calculate SPI and round to 2 decimal places
-    const spi = (cleanedActualProgress / cleanedPlanProgress).toFixed(2);
 
     // Make an HTTP request to the ClickUp API
     try {
