@@ -70,10 +70,16 @@ app.post(
     const cleanedPlanProgress = plan_progress.replace(/%25/g, "");
     const cleanedActualProgress = actual_progress.replace(/%25/g, "");
 
+    console.log(
+      `Cleaned plan_progress: ${cleanedPlanProgress}, Cleaned actual_progress: ${cleanedActualProgress}`,
+    );
+
     if (isNaN(cleanedPlanProgress) || isNaN(cleanedActualProgress)) {
       return res
         .status(400)
-        .send("plan_progress and actual_progress must be numbers");
+        .send(
+          `plan_progress (${cleanedPlanProgress}) and actual_progress (${cleanedActualProgress}) must be numbers`,
+        );
     }
 
     const spi = Number(cleanedActualProgress) / Number(cleanedPlanProgress);
