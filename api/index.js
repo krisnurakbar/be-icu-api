@@ -190,7 +190,7 @@ app.post("/api/cpi/:task_id/:plan_cost/:actual_cost", async (req, res) => {
   // Make an HTTP request to the ClickUp API (if needed)
   try {
     const clickUpResponse = await axios.post(
-      `https://api.clickup.com/api/v2/task/${task_id}/field/3fae2d90-850b-4ad8-b7d7-5846a5ee65a0`,
+      `https://api.clickup.com/api/v2/task/${task_id}/field/6388f1ee-66ba-480a-a187-e400442e99e1`,
       {
         value: cpi, // Send the calculated CPI value
       },
