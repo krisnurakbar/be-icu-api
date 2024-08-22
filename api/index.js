@@ -123,7 +123,6 @@ app.post(
       spi = (cleanedActualProgress / cleanedPlanProgress).toFixed(2);
     }
 
-
     // Make an HTTP request to the ClickUp API
     try {
       const clickUpResponse = await axios.post(
@@ -167,6 +166,65 @@ app.post(
     }
   },
 );
+
+// CPI endpoint with URL parameters
+app.post("/api/cpi/:task_id/:plan_cost/:actual_cost", async (req, res) => {
+  const { task_id, plan_cost, actual_cost } = req.params;
+
+  // Convert plan_cost and actual_cost to numbers
+  let planCost = parseFloat(plan_cost);
+  let actualCost = parseFloat(actual_cost);
+
+  // Handle cases where actual_cost or plan_cost is 0
+  if (actualCost === 0) {
+    actualCost = 1; // Avoid division by zero
+  }
+
+  if (planCost === 0) {
+    planCost = 1; // Avoid division by zero
+  }
+
+  // Calculate CPI
+  const cpi = (planCost / actualCost).toFixed(2);
+
+  // Make an HTTP request to the ClickUp API (if needed)
+  try {
+    const clickUpResponse = await axios.post(
+      `https://api.clickup.com/api/v2/task/${task_id}/field/3fae2d90-850b-4ad8-b7d7-5846a5ee65a0`,
+      {
+        value: cpi, // Send the calculated CPI value
+      },
+      {
+        headers: {
+          Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    console.log("ClickUp API response:", clickUpResponse.data);
+
+    // Respond with task_id, plan_cost, actual_cost, and the calculated CPI
+    res.status(200).json({
+      task_id,
+      plan_cost: planCost,
+      actual_cost: actualCost,
+      cpi: parseFloat(cpi),
+      clickUpResponse: clickUpResponse.data,
+    });
+  } catch (error) {
+    console.error(
+      "Error hitting ClickUp API:",
+      error.response ? error.response.data : error.message,
+    );
+
+    // Respond with an error if the ClickUp API request fails
+    res.status(500).json({
+      error: "Error hitting ClickUp API",
+      details: error.response ? error.response.data : error.message,
+    });
+  }
+});
 
 // Endpoint to get tasks
 app.get("/api/tasks", (req, res) => {
