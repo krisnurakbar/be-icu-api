@@ -2,8 +2,18 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
+const { Pool } = require('pg');
 
 const app = express();
+
+// PostgreSQL connection setup
+const pool = new Pool({
+  user: 'default',
+  host: 'ep-quiet-recipe-a1f508g5-pooler.ap-southeast-1.aws.neon.tech',
+  database: 'verceldb',
+  password: '3iNOK9SFPqtI',
+  port: 5432, // Default PostgreSQL port
+});
 
 // Middleware
 app.use(bodyParser.json());
@@ -232,5 +242,3 @@ app.get("/api/tasks", (req, res) => {
 });
 
 module.exports = app;
-
-//test
