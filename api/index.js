@@ -244,18 +244,14 @@ app.get("/api/tasks", (req, res) => {
 module.exports = app;
 
 // API endpoint to get project progress
-app.get('/api/project-progress', async (req, res) => {
+export default async function handler(req, res) {
   try {
       const result = await pool.query('SELECT * FROM t_project_progress');
-      res.json(result.rows);
+      res.status(200).json(result.rows);
   } catch (err) {
-      console.error(err);
+      console.error('Error querying the database', err);
       res.status(500).json({ error: 'Internal Server Error' });
   }
-});
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+}
 
 // Test Comment test
