@@ -12,7 +12,10 @@ const client = new Client({
   host: 'ep-quiet-recipe-a1f508g5-pooler.ap-southeast-1.aws.neon.tech',
   database: 'verceldb',
   password: '3iNOK9SFPqtI',
-  port: 5432 // Default PostgreSQL port
+  port: 5432, // Default PostgreSQL port
+  ssl: {
+    rejectUnauthorized: false // You might need this for self-signed certificates
+  }
 });
 
 // Middleware
