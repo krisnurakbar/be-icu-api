@@ -2,12 +2,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
-const { Client } = require('pg');
+const {Client} = require('pg');
 
 const app = express();
 
 // PostgreSQL connection setup
-const pool = new Client({
+const client = new Client({
   user: 'default',
   host: 'ep-quiet-recipe-a1f508g5-pooler.ap-southeast-1.aws.neon.tech',
   database: 'verceldb',
@@ -24,12 +24,14 @@ const tasks = [];
 
 app.get('/api/project-progress', async (req, res) => {
   try {
-      const result = await Client.query('SELECT * FROM t_project_progress');
+    client.connect();
+      const result = await client.query('SELECT * FROM t_project_progress');
       res.json(result.rows);
   } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Internal Server Error' });
   }
+  client.end;
 });
 
 // Webhook endpoint with URL parameters
