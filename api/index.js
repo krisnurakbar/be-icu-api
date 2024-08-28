@@ -2,17 +2,17 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
-const { Pool } = require('pg');
+const { Client } = require('pg');
 
 const app = express();
 
 // PostgreSQL connection setup
-const pool = new Pool({
+const pool = new Client({
   user: 'default',
   host: 'ep-quiet-recipe-a1f508g5-pooler.ap-southeast-1.aws.neon.tech',
   database: 'verceldb',
   password: '3iNOK9SFPqtI',
-  port: 5432, // Default PostgreSQL port
+  port: 5432 // Default PostgreSQL port
 });
 
 // Middleware
@@ -21,6 +21,16 @@ app.use(cors());
 
 // In-memory storage for tasks
 const tasks = [];
+
+app.get('/api/project-progress', async (req, res) => {
+  try {
+      const result = await Client.query('SELECT * FROM t_project_progress');
+      res.json(result.rows);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Webhook endpoint with URL parameters
 app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
