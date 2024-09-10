@@ -285,8 +285,8 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
     ];
 
     // Calculate working days if dates are provided
-    const plan_duration = startDate && dueDate ? calculateWorkingDays(startDate, dueDate, holidays) + 1 : 0;
-    const actual_duration = actualStartDate && actualEndDate ? calculateWorkingDays(actualStartDate, actualEndDate, holidays) + 1 : 0;
+    const plan_duration = startDate && dueDate ? calculateWorkingDays(startDate, dueDate, holidays) : 0;
+    const actual_duration = actualStartDate && actualEndDate ? calculateWorkingDays(actualStartDate, actualEndDate, holidays) : 0;
 
     // Ensure positive durations
     if (plan_duration < 0 || actual_duration < 0) {
