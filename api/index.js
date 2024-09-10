@@ -280,8 +280,13 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
     const holidays = [
       "2024-01-01", // New Year's Day
       "2024-04-12", // Example holiday
+      "2024-09-16",
       "2024-12-25", // Christmas
-      // Add more holidays as needed
+      "2024-12-26",
+      "2025-01-01",
+      "2025-01-27",
+      "2025-01-29",
+      // Add more holidays as needed'09/16/24','12/25/24','12/26/24','01/01/25','01/27/25','01/29/25'
     ];
 
     // Calculate working days if dates are provided
