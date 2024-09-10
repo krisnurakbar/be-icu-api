@@ -289,7 +289,7 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
     const actual_cost = actual_duration * rateCardValue;
 
     // Calculate CPI
-    const cpi = actual_cost > 0 ? (plan_cost / actual_cost).toFixed(2) : "N/A"; // Avoid division by zero
+    const cpi = actual_cost > 0 ? (plan_cost / actual_cost).toFixed(2) : 0; // Avoid division by zero
 
     // Make an HTTP request to update the CPI, plan_cost, and actual_cost in ClickUp
     const updateField = async (fieldId, value) => {
