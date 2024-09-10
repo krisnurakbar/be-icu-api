@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const axios = require("axios");
 const {Client} = require('pg');
+const { calculateWorkingDays } = require("../helpers/dateUtils");
 
 require('dotenv').config();
 
@@ -275,9 +276,17 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
     const actualStartDate = actual_start ? new Date(actual_start) : null;
     const actualEndDate = actual_end ? new Date(actual_end) : null;
 
-    // Calculate duration in days if dates are provided
-    const plan_duration = startDate && dueDate ? ((dueDate - startDate) / (1000 * 60 * 60 * 24) + 1) : 0;
-    const actual_duration = actualStartDate && actualEndDate ? ((actualEndDate - actualStartDate) / (1000 * 60 * 60 * 24) + 1) : 0;
+    // List of holidays for 2024 (can be customized in dateUtils.js)
+    const holidays = [
+      "2024-01-01", // New Year's Day
+      "2024-04-12", // Example holiday
+      "2024-12-25", // Christmas
+      // Add more holidays as needed
+    ];
+
+    // Calculate working days if dates are provided
+    const plan_duration = startDate && dueDate ? calculateWorkingDays(startDate, dueDate, holidays) + 1 : 0;
+    const actual_duration = actualStartDate && actualEndDate ? calculateWorkingDays(actualStartDate, actualEndDate, holidays) + 1 : 0;
 
     // Ensure positive durations
     if (plan_duration < 0 || actual_duration < 0) {
