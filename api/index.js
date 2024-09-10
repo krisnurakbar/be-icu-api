@@ -57,7 +57,7 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
       },
       {
         headers: {
-          Authorization: `${process.env.CLICKUP_API_TOKEN}`, // Replace with your actual ClickUp API token
+          Authorization: process.env.CLICKUP_API_TOKEN, // Replace with your actual ClickUp API token
           "Content-Type": "application/json",
         },
       },
@@ -160,7 +160,7 @@ app.post(
         },
         {
           headers: {
-            Authorization: `${process.env.CLICKUP_API_TOKEN}`, // Replace with your actual ClickUp API token
+            Authorization: process.env.CLICKUP_API_TOKEN, // Replace with your actual ClickUp API token
             "Content-Type": "application/json",
           },
         },
@@ -301,7 +301,7 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
         { value },
         {
           headers: {
-            Authorization: `${process.env.CLICKUP_API_TOKEN}`, // Replace with your actual ClickUp API token
+            Authorization: process.env.CLICKUP_API_TOKEN, // Replace with your actual ClickUp API token
             "Content-Type": "application/json",
           },
         }
