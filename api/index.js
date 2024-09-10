@@ -192,56 +192,138 @@ app.post(
   },
 );
 
-// CPI endpoint with URL parameters
-app.post("/api/cpi/:task_id/:plan_cost/:actual_cost", async (req, res) => {
-  const { task_id, plan_cost, actual_cost } = req.params;
+// // CPI endpoint with URL parameters
+// app.post("/api/cpi/:task_id/:plan_cost/:actual_cost", async (req, res) => {
+//   const { task_id, plan_cost, actual_cost } = req.params;
 
-  // Convert plan_cost and actual_cost to numbers
-  let planCost = parseFloat(plan_cost);
-  let actualCost = parseFloat(actual_cost);
+//   // Convert plan_cost and actual_cost to numbers
+//   let planCost = parseFloat(plan_cost);
+//   let actualCost = parseFloat(actual_cost);
 
-  // Handle cases where actual_cost or plan_cost is 0
-  if (actualCost === 0) {
-    actualCost = 1; // Avoid division by zero
-  }
+//   // Handle cases where actual_cost or plan_cost is 0
+//   if (actualCost === 0) {
+//     actualCost = 1; // Avoid division by zero
+//   }
 
-  if (planCost === 0) {
-    planCost = 1; // Avoid division by zero
-  }
+//   if (planCost === 0) {
+//     planCost = 1; // Avoid division by zero
+//   }
 
-  // Calculate CPI
-  const cpi = (planCost / actualCost).toFixed(2);
+//   // Calculate CPI
+//   const cpi = (planCost / actualCost).toFixed(2);
 
-  // Make an HTTP request to the ClickUp API (if needed)
+//   // Make an HTTP request to the ClickUp API (if needed)
+//   try {
+//     const clickUpResponse = await axios.post(
+//       `https://api.clickup.com/api/v2/task/${task_id}/field/6388f1ee-66ba-480a-a187-e400442e99e1`,
+//       {
+//         value: cpi, // Send the calculated CPI value
+//       },
+//       {
+//         headers: {
+//           Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
+//           "Content-Type": "application/json",
+//         },
+//       },
+//     );
+
+//     console.log("ClickUp API response:", clickUpResponse.data);
+
+//     // Respond with task_id, plan_cost, actual_cost, and the calculated CPI
+//     res.status(200).json({
+//       task_id,
+//       plan_cost: planCost,
+//       actual_cost: actualCost,
+//       cpi: parseFloat(cpi),
+//       clickUpResponse: clickUpResponse.data,
+//     });
+//   } catch (error) {
+//     console.error(
+//       "Error hitting ClickUp API:",
+//       error.response ? error.response.data : error.message,
+//     );
+
+//     // Respond with an error if the ClickUp API request fails
+//     res.status(500).json({
+//       error: "Error hitting ClickUp API",
+//       details: error.response ? error.response.data : error.message,
+//     });
+//   }
+// });
+
+// CPI endpoint with URL parameters ==============================================================================
+// this endpoint to calculate from date into cost
+//
+
+app.post("/api/cpi/:task_id/:rate_card/:start_date/:due_date/:actual_start/:actual_end", async (req, res) => {
+  const { task_id, rate_card, start_date, due_date, actual_start, actual_end } = req.params;
+
   try {
-    const clickUpResponse = await axios.post(
-      `https://api.clickup.com/api/v2/task/${task_id}/field/6388f1ee-66ba-480a-a187-e400442e99e1`,
-      {
-        value: cpi, // Send the calculated CPI value
-      },
-      {
-        headers: {
-          Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    // Parse dates correctly to calculate durations
+    const startDate = new Date(start_date);
+    const dueDate = new Date(due_date);
+    const actualStartDate = new Date(actual_start);
+    const actualEndDate = new Date(actual_end);
 
-    console.log("ClickUp API response:", clickUpResponse.data);
+    // Calculate duration in days
+    const plan_duration = (dueDate - startDate) / (1000 * 60 * 60 * 24); // Milliseconds to days
+    const actual_duration = (actualEndDate - actualStartDate) / (1000 * 60 * 60 * 24); // Milliseconds to days
+
+    // Ensure positive durations
+    if (plan_duration <= 0 || actual_duration <= 0) {
+      return res.status(400).json({ error: "Invalid date range for duration calculation" });
+    }
+
+    // Calculate costs based on the rate card
+    const plan_cost = plan_duration * rate_card;
+    const actual_cost = actual_duration * rate_card;
+
+    // Calculate CPI
+    const cpi = (plan_cost / actual_cost).toFixed(2); // CPI formula: plan_cost / actual_cost
+
+    // Make an HTTP request to update the CPI, plan_cost, and actual_cost in ClickUp
+    const updateField = async (fieldId, value) => {
+      return axios.post(
+        `https://api.clickup.com/api/v2/task/${task_id}/field/${fieldId}`,
+        { value },
+        {
+          headers: {
+            Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    };
+
+    // Update CPI field (replace the field ID with the correct one for CPI)
+    const cpiResponse = await updateField('6388f1ee-66ba-480a-a187-e400442e99e1', cpi);
+
+    // Update Plan Cost field (replace with your field ID for plan_cost)
+    const planCostResponse = await updateField('plan_cost_field_id', plan_cost);
+
+    // Update Actual Cost field (replace with your field ID for actual_cost)
+    const actualCostResponse = await updateField('actual_cost_field_id', actual_cost);
+
+    console.log("ClickUp API response:", {
+      cpiResponse: cpiResponse.data,
+      planCostResponse: planCostResponse.data,
+      actualCostResponse: actualCostResponse.data,
+    });
 
     // Respond with task_id, plan_cost, actual_cost, and the calculated CPI
     res.status(200).json({
       task_id,
-      plan_cost: planCost,
-      actual_cost: actualCost,
+      plan_cost,
+      actual_cost,
       cpi: parseFloat(cpi),
-      clickUpResponse: clickUpResponse.data,
+      clickUpResponses: {
+        cpi: cpiResponse.data,
+        plan_cost: planCostResponse.data,
+        actual_cost: actualCostResponse.data,
+      },
     });
   } catch (error) {
-    console.error(
-      "Error hitting ClickUp API:",
-      error.response ? error.response.data : error.message,
-    );
+    console.error("Error hitting ClickUp API:", error.response ? error.response.data : error.message);
 
     // Respond with an error if the ClickUp API request fails
     res.status(500).json({
