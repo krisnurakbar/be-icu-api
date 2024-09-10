@@ -276,8 +276,8 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
     const actualEndDate = actual_end ? new Date(actual_end) : null;
 
     // Calculate duration in days if dates are provided
-    const plan_duration = startDate && dueDate ? (dueDate - startDate) / (1000 * 60 * 60 * 24) : 0;
-    const actual_duration = actualStartDate && actualEndDate ? (actualEndDate - actualStartDate) / (1000 * 60 * 60 * 24) : 0;
+    const plan_duration = startDate && dueDate ? ((dueDate - startDate) / (1000 * 60 * 60 * 24) + 1) : 0;
+    const actual_duration = actualStartDate && actualEndDate ? ((actualEndDate - actualStartDate) / (1000 * 60 * 60 * 24) + 1) : 0;
 
     // Ensure positive durations
     if (plan_duration < 0 || actual_duration < 0) {
