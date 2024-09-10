@@ -4,6 +4,9 @@ const cors = require("cors");
 const axios = require("axios");
 const {Client} = require('pg');
 
+require('dotenv').config();
+
+
 const app = express();
 
 // PostgreSQL connection setup
@@ -54,7 +57,7 @@ app.post("/api/webhook/:task_id/:status_name", async (req, res) => {
       },
       {
         headers: {
-          Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
+          Authorization: `${process.env.CLICKUP_API_TOKEN}`, // Replace with your actual ClickUp API token
           "Content-Type": "application/json",
         },
       },
@@ -157,7 +160,7 @@ app.post(
         },
         {
           headers: {
-            Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
+            Authorization: `${process.env.CLICKUP_API_TOKEN}`, // Replace with your actual ClickUp API token
             "Content-Type": "application/json",
           },
         },
@@ -298,7 +301,7 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
         { value },
         {
           headers: {
-            Authorization: "pk_60846077_JQGXG9DFNVM07G7ET0JCGASAWSO8S2YM", // Replace with your actual ClickUp API token
+            Authorization: `${process.env.CLICKUP_API_TOKEN}`, // Replace with your actual ClickUp API token
             "Content-Type": "application/json",
           },
         }
