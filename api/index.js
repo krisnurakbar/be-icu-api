@@ -255,41 +255,41 @@ app.post(
 // this endpoint to calculate from date into cost
 //
 
-app.post("/api/cpi/:task_id/:rate_card/:start_date/:due_date/:actual_start/:actual_end", async (req, res) => {
-  const { task_id, rate_card, start_date, due_date, actual_start, actual_end } = req.params;
+app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:actual_end?", async (req, res) => {
+  let { task_id, rate_card, start_date, due_date, actual_start, actual_end } = req.params;
+
+  // Provide default values for missing parameters
+  rate_card = rate_card ? decodeURIComponent(rate_card) : "0";
+  start_date = start_date ? decodeURIComponent(start_date) : null;
+  due_date = due_date ? decodeURIComponent(due_date) : null;
+  actual_start = actual_start ? decodeURIComponent(actual_start) : null;
+  actual_end = actual_end ? decodeURIComponent(actual_end) : null;
 
   try {
-    // Decode URL components
-    const decodedRateCard = decodeURIComponent(rate_card);
-    const decodedStartDate = decodeURIComponent(start_date);
-    const decodedDueDate = decodeURIComponent(due_date);
-    const decodedActualStartDate = decodeURIComponent(actual_start);
-    const decodedActualEndDate = decodeURIComponent(actual_end);
+    // Parse dates correctly to calculate durations, if dates are provided
+    const startDate = start_date ? new Date(start_date) : null;
+    const dueDate = due_date ? new Date(due_date) : null;
+    const actualStartDate = actual_start ? new Date(actual_start) : null;
+    const actualEndDate = actual_end ? new Date(actual_end) : null;
 
-    // Parse dates correctly to calculate durations
-    const startDate = new Date(decodedStartDate);
-    const dueDate = new Date(decodedDueDate);
-    const actualStartDate = new Date(decodedActualStartDate);
-    const actualEndDate = new Date(decodedActualEndDate);
-
-    // Calculate duration in days
-    const plan_duration = (dueDate - startDate) / (1000 * 60 * 60 * 24); // Milliseconds to days
-    const actual_duration = (actualEndDate - actualStartDate) / (1000 * 60 * 60 * 24); // Milliseconds to days
+    // Calculate duration in days if dates are provided
+    const plan_duration = startDate && dueDate ? (dueDate - startDate) / (1000 * 60 * 60 * 24) : 0;
+    const actual_duration = actualStartDate && actualEndDate ? (actualEndDate - actualStartDate) / (1000 * 60 * 60 * 24) : 0;
 
     // Ensure positive durations
-    if (plan_duration <= 0 || actual_duration <= 0) {
+    if (plan_duration < 0 || actual_duration < 0) {
       return res.status(400).json({ error: "Invalid date range for duration calculation" });
     }
 
-    // Parse rate card value to float (e.g., "IDR 100" -> 100)
-    const rateCardValue = parseFloat(decodedRateCard.replace(/[^0-9.-]+/g, ""));
+    // Parse rate card value to float
+    const rateCardValue = parseFloat(rate_card.replace(/[^0-9.-]+/g, "")) || 0;
 
     // Calculate costs based on the rate card
     const plan_cost = plan_duration * rateCardValue;
     const actual_cost = actual_duration * rateCardValue;
 
     // Calculate CPI
-    const cpi = (plan_cost / actual_cost).toFixed(2); // CPI formula: plan_cost / actual_cost
+    const cpi = actual_cost > 0 ? (plan_cost / actual_cost).toFixed(2) : "N/A"; // Avoid division by zero
 
     // Make an HTTP request to update the CPI, plan_cost, and actual_cost in ClickUp
     const updateField = async (fieldId, value) => {
@@ -308,6 +308,12 @@ app.post("/api/cpi/:task_id/:rate_card/:start_date/:due_date/:actual_start/:actu
     // Update CPI field (replace the field ID with the correct one for CPI)
     const cpiResponse = await updateField('6388f1ee-66ba-480a-a187-e400442e99e1', cpi);
 
+    // Update Actual Cost field (replace with your field ID for actual_cost)
+    const planDurationResponse = await updateField('90effb59-c9dd-4bc6-b606-715472978571', plan_duration);
+
+    // Update Actual Cost field (replace with your field ID for actual_cost)
+    const actualDurationResponse = await updateField('cc2c3431-f7ba-4504-895e-da0a8432f9c4', actual_duration);
+
     // Update Plan Cost field (replace with your field ID for plan_cost)
     const planCostResponse = await updateField('db146b20-8876-42a0-aa1a-498d169a8805', plan_cost);
 
@@ -318,6 +324,8 @@ app.post("/api/cpi/:task_id/:rate_card/:start_date/:due_date/:actual_start/:actu
       cpiResponse: cpiResponse.data,
       planCostResponse: planCostResponse.data,
       actualCostResponse: actualCostResponse.data,
+      planDurationResponse: planDurationResponse.data,
+      actualDurationResponse: actualDurationResponse.data,
     });
 
     // Respond with task_id, plan_cost, actual_cost, and the calculated CPI
@@ -330,6 +338,8 @@ app.post("/api/cpi/:task_id/:rate_card/:start_date/:due_date/:actual_start/:actu
         cpi: cpiResponse.data,
         plan_cost: planCostResponse.data,
         actual_cost: actualCostResponse.data,
+        plan_duration: planDurationResponse.data,
+        actual_duration: actualDurationResponse.data,
       },
     });
   } catch (error) {
@@ -342,6 +352,7 @@ app.post("/api/cpi/:task_id/:rate_card/:start_date/:due_date/:actual_start/:actu
     });
   }
 });
+
 
 
 // Endpoint to get tasks
