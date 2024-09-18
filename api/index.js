@@ -4,6 +4,7 @@ const cors = require("cors");
 const axios = require("axios");
 const {Client} = require('pg');
 const { calculateWorkingDays } = require("../helpers/dateUtils");
+const cron = require('node-cron');
 
 require('dotenv').config();
 
@@ -370,7 +371,63 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
   }
 });
 
+// Function to fetch and filter the relevant fields
+const fetchClickUpData = async () => {
+  try {
+    const listId = '901602641366'; // Replace with your actual list ID
+    const response = await axios.get(`https://api.clickup.com/api/v2/list/${listId}/task`, {
+      headers: {
+        Authorization: process.env.CLICKUP_API_TOKEN
+      },
+      params: {
+        archived: 'false',
+        include_markdown_description: 'true',
+        page: 0,
+        order_by: 'due_date',
+        reverse: 'true',
+        subtasks: 'true',
+        statuses: ['in progress', 'completed'],
+        include_closed: 'true'
+      }
+    });
 
+    const tasks = response.data.tasks;
+
+    // Map through the tasks to extract the necessary fields
+    const extractedTasks = tasks.map(task => {
+      // Extract relevant custom fields (assuming they're in custom_fields array)
+      const planProgressField = task.custom_fields.find(field => field.name === 'P. Progress');
+      const actualProgressField = task.custom_fields.find(field => field.name === 'A. Progress');
+      const planCostField = task.custom_fields.find(field => field.name === 'Plan Cost');
+      const actualCostField = task.custom_fields.find(field => field.name === 'Actual Cost');
+      const rateCardField = task.custom_fields.find(field => field.name === 'Rate Card');
+
+      return {
+        taskId: task.id,
+        taskTitle: task.name,
+        planProgress: planProgressField ? planProgressField.value : null,
+        actualProgress: actualProgressField ? actualProgressField.value : null,
+        planCost: planCostField ? planCostField.value : null,
+        actualCost: actualCostField ? actualCostField.value : null,
+        rateCard: rateCardField ? rateCardField.value : null,
+        startDate: task.start_date ? new Date(parseInt(task.start_date)) : null,
+        dueDate: task.due_date ? new Date(parseInt(task.due_date)) : null,
+        actualStart: task.date_created ? new Date(parseInt(task.date_created)) : null
+      };
+    });
+
+    // Handle or store the extracted tasks (for example, log them or save to a database)
+    console.log('Extracted Tasks:', extractedTasks);
+  } catch (error) {
+    console.error('Error fetching ClickUp data:', error.response ? error.response.data : error.message);
+  }
+};
+
+// Schedule the cron job to run every hour
+cron.schedule('0 * * * *', () => {
+  console.log('Fetching data from ClickUp API...');
+  fetchClickUpData();
+});
 
 // Endpoint to get tasks
 app.get("/api/tasks", (req, res) => {
