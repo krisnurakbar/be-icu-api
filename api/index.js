@@ -423,6 +423,11 @@ const fetchClickUpData = async () => {
   }
 };
 
+app.post('/gettask', (req, res) => {
+  fetchClickUpData();  // Trigger the task
+  res.send('Task executed successfully!');
+});
+
 // Schedule the cron job to run every hour
 cron.schedule('0 * * * *', () => {
   console.log('Fetching data from ClickUp API...');
