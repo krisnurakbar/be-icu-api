@@ -423,9 +423,19 @@ const fetchClickUpData = async () => {
   }
 };
 
-app.post('/gettask', (req, res) => {
-  fetchClickUpData();  // Trigger the task
-  res.send('Task executed successfully!');
+app.post('/gettask', async (req, res) => {
+  try {
+    const data = await fetchClickUpData();  // Call the fetch function
+    res.status(200).json({
+      message: 'Task executed successfully!',
+      data: data  // Return the fetched data in the response
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error occurred while executing task',
+      error: error.message
+    });
+  }
 });
 
 // Schedule the cron job to run every hour
