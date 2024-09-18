@@ -375,7 +375,7 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
 const fetchClickUpData = async () => {
   try {
     const listId = '901602641366'; // Replace with your actual list ID
-    const response = await axios.get(`https://api.clickup.com/api/v2/list/${listId}/task`, {
+    const response = await axios.get(`https://api.clickup.com/api/v2/list/${listId}/task?subtasks=true`, {
       headers: {
         Authorization: process.env.CLICKUP_API_TOKEN
       },
