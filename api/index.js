@@ -423,7 +423,7 @@ const fetchClickUpData = async () => {
   }
 };
 
-app.post('/gettask', async (req, res) => {
+app.get('/gettask', async (req, res) => {
   try {
     const data = await fetchClickUpData();  // Call the fetch function
     res.status(200).json({
