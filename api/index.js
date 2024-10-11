@@ -299,7 +299,7 @@ app.post("/api/cpi/:task_id/:rate_card?/:start_date?/:due_date?/:actual_start?/:
       return res.status(400).json({ error: "Invalid date range for duration calculation" });
     }
 
-    // Parse rate card value to float
+    // Parse rate card value to float test
     const rateCardValue = parseFloat(rate_card.replace(/[^0-9.-]+/g, "")) || 0;
 
     // Calculate costs based on the rate card
